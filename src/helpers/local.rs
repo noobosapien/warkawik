@@ -1,12 +1,13 @@
 use super::command_line::PrintCommand;
-use crate::{api::calls::call_gpt, models::general::llm::Message};
+use crate::{llm_api::calls::call_gpt, models::general::llm::Message};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde_json;
 use std::{fmt::format, fs};
 
 pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
-pub const STATIC_PATH: &str = "../../static/shader.frag";
+pub const FRAG_SHADER_MAIN: &str = "../../static/shader.frag";
+pub const STATIC_PATH: &str = "../../static/";
 
 //Extends the given functions output by adding more context to what is actually needed from the LLM.
 pub fn extend_function(func: fn(&str) -> &'static str, input: &str) -> Message {
@@ -65,7 +66,7 @@ pub async fn task_request_decoded<T: DeserializeOwned>(
     decoded
 }
 
-pub async fn check_Status(client: &Client, url: &str) -> Result<u16, reqwest::Error> {
+pub async fn check_status(client: &Client, url: &str) -> Result<u16, reqwest::Error> {
     let res: reqwest::Response = client.get(url).send().await?;
     Ok(res.status().as_u16())
 }
@@ -73,6 +74,11 @@ pub async fn check_Status(client: &Client, url: &str) -> Result<u16, reqwest::Er
 pub fn read_template() -> String {
     let path: String = FRAG_SHADER_TEMPLATE.to_string();
     fs::read_to_string(path).expect("Couldn't read the Fragment shader template file.")
+}
+
+pub fn read_frag_shader() -> String {
+    let path: String = FRAG_SHADER_MAIN.to_string();
+    fs::read_to_string(path).expect("Couldn't read the Fragment shader main file.")
 }
 
 pub fn save_frag_file(frag: &String) {

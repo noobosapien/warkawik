@@ -1,8 +1,15 @@
+#[macro_export]
+macro_rules! get_func_str {
+    ($func: ident) => {{
+        stringify!($func)
+    }};
+}
+#[macro_use]
 use helpers::command_line::get_response;
 
 mod ai_functions;
-mod api;
 mod helpers;
+mod llm_api;
 mod models;
 
 fn main() {
