@@ -5,9 +5,10 @@ use serde::de::DeserializeOwned;
 use serde_json;
 use std::{fmt::format, fs};
 
-pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
-pub const FRAG_SHADER_MAIN: &str = "../../static/shader.frag";
-pub const STATIC_PATH: &str = "../../static/";
+pub const FRAG_SHADER_TEMPLATE: &str =
+    "/home/migara/Desktop/projects/warkawik/static/template.frag";
+pub const FRAG_SHADER_MAIN: &str = "/home/migara/Desktop/projects/warkawik/static/shader.frag";
+pub const STATIC_PATH: &str = "/home/migara/Desktop/projects/warkawik/static/new.frag";
 
 //Extends the given functions output by adding more context to what is actually needed from the LLM.
 pub fn extend_function(func: fn(&str) -> &'static str, input: &str) -> Message {

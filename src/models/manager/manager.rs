@@ -3,7 +3,7 @@ use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
 
 use crate::ai_functions::ai_manager::input_to_goal;
 use crate::helpers::local::task_request;
-use crate::models::agents::artist_agent;
+use crate::models::agents::artist_agent::{self, ArtistAgent};
 use crate::models::general::llm::Message;
 
 #[derive(Debug)]
@@ -53,7 +53,7 @@ impl Manager {
     }
 
     fn create_agents(&mut self) {
-        // TODO add artist
+        self.add_agent(Box::new(ArtistAgent::new()));
     }
 
     pub async fn execute_all(&mut self) {

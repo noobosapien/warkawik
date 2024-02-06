@@ -6,13 +6,20 @@ macro_rules! get_func_str {
 }
 #[macro_use]
 use helpers::command_line::get_response;
+use models::manager::manager::Manager;
 
 mod ai_functions;
 mod helpers;
 mod llm_api;
 mod models;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let usr_request: String = get_response("Define your perfect shader: ");
-    dbg!(usr_request);
+
+    let mut managing_agent: Manager = Manager::new(usr_request)
+        .await
+        .expect("Error creating the managing agent.");
+
+    managing_agent.execute_all().await;
 }
