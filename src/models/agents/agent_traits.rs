@@ -2,6 +2,7 @@ use crate::models::core_agent::core_agent::CoreAgent;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use std::marker::Send;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RouteObject {
@@ -26,7 +27,11 @@ pub struct Shader {
 }
 
 #[async_trait]
-pub trait AgentFunctions: Debug {
+pub trait AgentFunctions
+where
+    Self: Send,
+    Self: Debug,
+{
     fn get_attributes_from_agent(&self) -> &CoreAgent;
 
     async fn execute(&mut self, shader: &mut Shader) -> Result<(), Box<dyn std::error::Error>>;

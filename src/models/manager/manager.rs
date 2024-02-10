@@ -6,15 +6,25 @@ use crate::helpers::local::task_request;
 use crate::models::agents::artist_agent::{self, ArtistAgent};
 use crate::models::general::llm::Message;
 
-#[derive(Debug)]
+use std::marker::Send;
+use std::rc::Rc;
+use std::sync::Arc;
+
+// #[derive(Debug)]
 pub struct Manager {
     attributes: CoreAgent,
     shader: Shader,
     agents: Vec<Box<dyn AgentFunctions>>,
+    send_func: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>>,
 }
 
+unsafe impl Send for Manager {}
+
 impl Manager {
-    pub async fn new(usr_req: String) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(
+        usr_req: String,
+        send_func: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let position: String = "Manager".to_string();
 
         let attributes: CoreAgent = CoreAgent {
@@ -45,6 +55,7 @@ impl Manager {
             attributes,
             agents,
             shader,
+            send_func,
         })
     }
 
@@ -74,7 +85,10 @@ mod tests {
     async fn tests_manager() {
         let usr_req: &str = "create a shader that shows a palm tree in a sunset";
 
-        let mut manager_ai: Manager = Manager::new(usr_req.to_string())
+        let send_msg: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>> =
+            Arc::new(Box::new(|agent_msg: Rc<String>| {}));
+
+        let mut manager_ai: Manager = Manager::new(usr_req.to_string(), send_msg)
             .await
             .expect("Error creating the managing agent");
 
