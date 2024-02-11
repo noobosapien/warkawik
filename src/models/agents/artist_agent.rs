@@ -9,11 +9,14 @@ use crate::helpers::local::{
 use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
 
 use crate::models::agents::agent_traits::{AgentFunctions, RouteObject, Shader};
+use crate::models::manager::manager::Manager;
 
 use async_trait::async_trait;
 use core::panic;
 use reqwest::Client;
 use std::process::{Command, Stdio};
+use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;
 
@@ -23,10 +26,11 @@ pub struct ArtistAgent {
     attributes: CoreAgent,
     bug_errors: Option<String>,
     bug_count: u8,
+    manager: *const Manager,
 }
 
 impl ArtistAgent {
-    pub fn new() -> Self {
+    pub fn new(manager: *const Manager) -> Self {
         let attributes: CoreAgent = CoreAgent {
             objective: "Develops code for the fragment shader".to_string(),
             position: "Artist Agent".to_string(),
@@ -38,6 +42,7 @@ impl ArtistAgent {
             attributes,
             bug_errors: None,
             bug_count: 0,
+            manager,
         }
     }
 
@@ -48,6 +53,10 @@ impl ArtistAgent {
             "CODE_TEMPLATE: {:?} \n SHADER_DESCRIPTION: {:?}\n",
             shader.frag_shader, shader
         );
+
+        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
+
+        manager.send_msg("Creating the shader.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -103,6 +112,8 @@ impl ArtistAgent {
     }
 }
 
+unsafe impl Send for ArtistAgent {}
+
 #[async_trait]
 impl AgentFunctions for ArtistAgent {
     fn get_attributes_from_agent(&self) -> &CoreAgent {
@@ -143,11 +154,29 @@ impl AgentFunctions for ArtistAgent {
 
 #[cfg(test)]
 mod tests {
+    use crate::helpers::send_func::SendFn;
+    use crate::models::manager::manager::Manager;
+    use std::rc::Rc;
+    use std::sync::Arc;
+
     use super::*;
 
     #[tokio::test]
     async fn tests_shader_artist() {
-        let mut agent = ArtistAgent::new();
+        let send_msg: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>> =
+            Arc::new(Box::new(move |agent_msg: Rc<String>| {
+                let agent_str = (*agent_msg).to_string();
+
+                println!("{}", agent_str);
+            }));
+
+        let send_struct = Arc::new(SendFn::new(send_msg));
+
+        let manager = Manager::new("".to_string(), send_struct)
+            .await
+            .expect("Unable to create a manager");
+
+        let mut agent = ArtistAgent::new(&manager);
 
         let shader_str: &str = r#"
         {

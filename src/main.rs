@@ -18,6 +18,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use warp::ws::{Message, WebSocket};
 use warp::Filter;
 
+use helpers::send_func::SendFn;
 use models::manager::manager::Manager;
 
 mod ai_functions;
@@ -108,8 +109,10 @@ async fn user_message(my_id: usize, msg: Message, users: &Users) {
             }));
         }
 
+        let send_struct = Arc::new(SendFn::new(send_msg));
+
         if my_id == uid {
-            let send_msg_to_thread = Arc::clone(&send_msg);
+            let send_msg_to_thread = Arc::clone(&send_struct);
             let mut managing_agent: Manager = Manager::new(msg.to_string(), send_msg_to_thread)
                 .await
                 .expect("Error creating the managing agent.");
