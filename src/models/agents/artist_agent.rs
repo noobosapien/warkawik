@@ -2,10 +2,10 @@ use crate::ai_functions::ai_artist::{
     print_fixed_code, print_frag_shader_code, print_improved_frag_shader_code,
 };
 use crate::helpers::command_line::{decision_to_proceed, PrintCommand};
-use crate::helpers::local::task_request;
 use crate::helpers::local::{
     check_status, read_frag_shader, read_template, save_frag_file, STATIC_PATH,
 };
+use crate::helpers::local::{sanitize_frag, task_request};
 use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
 
 use crate::models::agents::agent_traits::{AgentFunctions, RouteObject, Shader};
@@ -51,7 +51,7 @@ impl ArtistAgent {
 
         let msg_context: String = format!(
             "CODE_TEMPLATE: {:?} \n SHADER_DESCRIPTION: {:?}\n",
-            shader.frag_shader, shader
+            code_template_str, shader
         );
 
         let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
@@ -65,9 +65,10 @@ impl ArtistAgent {
             print_frag_shader_code,
         )
         .await;
+        let sanitized = sanitize_frag(ai_response);
 
-        save_frag_file(&ai_response);
-        shader.frag_shader = Some(ai_response);
+        // save_frag_file(&ai_response);
+        shader.frag_shader = Some(sanitized);
     }
 
     async fn call_improved_shader_code(&mut self, shader: &mut Shader) {
@@ -78,6 +79,10 @@ impl ArtistAgent {
             shader.frag_shader, shader
         );
 
+        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
+
+        manager.send_msg("Improving the shader.".to_string());
+
         let ai_response: String = task_request(
             msg_context,
             &self.attributes.position,
@@ -86,8 +91,13 @@ impl ArtistAgent {
         )
         .await;
 
-        save_frag_file(&ai_response);
-        shader.frag_shader = Some(ai_response);
+        let sanitized = sanitize_frag(ai_response);
+
+        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
+        manager.send_msg(sanitized.clone());
+
+        save_frag_file(&sanitized);
+        shader.frag_shader = Some(sanitized);
     }
 
     async fn call_fix_shader_code(&mut self, shader: &mut Shader) {
@@ -99,6 +109,10 @@ impl ArtistAgent {
             shader.frag_shader, self.bug_errors
         );
 
+        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
+
+        manager.send_msg("Fixing shader bugs.".to_string());
+
         let ai_response: String = task_request(
             msg_context,
             &self.attributes.position,
@@ -107,8 +121,10 @@ impl ArtistAgent {
         )
         .await;
 
-        save_frag_file(&ai_response);
-        shader.frag_shader = Some(ai_response);
+        let sanitized = sanitize_frag(ai_response);
+
+        save_frag_file(&sanitized);
+        shader.frag_shader = Some(sanitized);
     }
 }
 
@@ -144,7 +160,15 @@ impl AgentFunctions for ArtistAgent {
                     // Implement later
                     self.attributes.state = AgentState::Finished;
                 }
-                _ => self.attributes.state = AgentState::Finished,
+
+                AgentState::Finished => {
+                    println!("Done");
+                    break;
+                }
+                _ => {
+                    self.attributes.state = AgentState::Finished;
+                    break;
+                }
             }
         }
 

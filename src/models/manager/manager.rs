@@ -80,6 +80,11 @@ impl Manager {
         for agent in &mut self.agents {
             let agent_res: Result<(), Box<dyn std::error::Error>> =
                 agent.execute(&mut self.shader).await;
+
+            match agent_res {
+                Ok(()) => println!("Done creating the sahder"),
+                Err(_) => println!("Error creating the shader"),
+            }
         }
     }
 }

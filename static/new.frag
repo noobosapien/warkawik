@@ -1,19 +1,21 @@
-```glsl
-precision mediump float;
+precision highp float;
 
-uniform float time;
-uniform vec2 resolution;
+varying vec2 v_fragTexCoord;
 
-void main() {
-    vec2 position = (gl_FragCoord.xy / resolution.xy) * 2.0 - 1.0;
-    position.x *= resolution.x / resolution.y;
+uniform float u_time;
+uniform vec2 u_resolution;
 
-    float color = 0.0;
-    vec2 center = vec2(sin(time * 0.1) * 0.5, cos(time * 0.15) * 0.25);
-    color += 0.5 + 0.5 * sin(distance(position, center) * 10.0 - time * 2.0);
-    color += 0.5 + 0.5 * cos(length(position - center) * 10.0 - time * 3.0);
-    color *= 1.0 - length(position - center) * 0.3;
+void main()
+{
+    float rocketPosition = mod(u_time, 2.0) - 1.0; // Rocket moves up every 2 seconds
+    vec2 rocketShape = vec2(0.1, 0.3); // Width and height of the rocket
+    vec2 position = (gl_FragCoord.xy / u_resolution.xy) * 2.0 - 1.0; // Convert pixel position to -1 to 1 range
+    position.y -= rocketPosition; // Move the rocket up
 
-    gl_FragColor = vec4(color, color * 0.5, 0.0, 1.0);
+    // Check if we're inside the rocket shape
+    if (abs(position.x) < rocketShape.x && abs(position.y) < rocketShape.y) {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red color
+    } else {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // Black background
+    }
 }
-```

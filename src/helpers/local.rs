@@ -82,6 +82,22 @@ pub fn read_frag_shader() -> String {
     fs::read_to_string(path).expect("Couldn't read the Fragment shader main file.")
 }
 
+pub fn sanitize_frag(frag: String) -> String {
+    let lines = frag.split("\n");
+
+    let out: &mut String = &mut String::new();
+
+    for line in lines {
+        match line {
+            _ if line == "```glsl" => continue,
+            _ if line == "```" => continue,
+            _ => out.push_str(&format!("{}\n", line)),
+        }
+    }
+
+    out.to_string()
+}
+
 pub fn save_frag_file(frag: &String) {
     let path: String = STATIC_PATH.to_string();
     fs::write(path, frag).expect("Couldn't write the Fragment shader file.")
