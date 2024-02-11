@@ -6,6 +6,7 @@ macro_rules! get_func_str {
 }
 #[macro_use]
 use std::collections::HashMap;
+use serde_json::json;
 use std::rc::Rc;
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
@@ -92,17 +93,25 @@ async fn user_message(my_id: usize, msg: Message, users: &Users) {
     for (&uid, tx) in users.read().await.iter() {
         let strong_tx = tx.downgrade().clone().upgrade();
 
-        let send_msg: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>>;
+        let send_msg: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>>;
 
         if let Some(custom_tx) = strong_tx {
-            send_msg = Arc::new(Box::new(move |agent_msg: Rc<String>| {
-                let agent_str = (*agent_msg).to_string();
+            send_msg = Arc::new(Box::new(move |num: u8, agent_msg: Rc<String>| {
+                let mut agent_msg_str: String = (*agent_msg).to_string();
+
+                let value_json = json!({
+                    "status": num,
+                    "content": agent_msg_str,
+                });
+
+                let agent_str = value_json.to_string();
+
                 if let Err(_disconnected) = custom_tx.send(Message::text(agent_str)) {
                     println!("Client unable to reach.");
                 }
             }));
         } else {
-            send_msg = Arc::new(Box::new(move |agent_msg: Rc<String>| {
+            send_msg = Arc::new(Box::new(move |num: u8, agent_msg: Rc<String>| {
                 let agent_str = (*agent_msg).to_string();
 
                 println!("{}", agent_str);

@@ -68,10 +68,10 @@ impl Manager {
         self.add_agent(Box::new(ArtistAgent::new(self as *const Manager)));
     }
 
-    pub fn send_msg(&self, msg: String) {
-        let arc_func: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>> = self.send_func.get();
+    pub fn send_msg(&self, num: u8, msg: String) {
+        let arc_func: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> = self.send_func.get();
 
-        arc_func(Rc::new(msg));
+        arc_func(num, Rc::new(msg));
     }
 
     pub async fn execute_all(&mut self) {
@@ -82,7 +82,7 @@ impl Manager {
                 agent.execute(&mut self.shader).await;
 
             match agent_res {
-                Ok(()) => println!("Done creating the sahder"),
+                Ok(()) => println!("Done creating the shader"),
                 Err(_) => println!("Error creating the shader"),
             }
         }
@@ -97,8 +97,8 @@ mod tests {
     async fn tests_manager() {
         let usr_req: &str = "create a shader that shows a palm tree in a sunset";
 
-        let send_msg: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>> =
-            Arc::new(Box::new(|agent_msg: Rc<String>| {}));
+        let send_msg: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> =
+            Arc::new(Box::new(|num: u8, agent_msg: Rc<String>| {}));
 
         let send_struct = Arc::new(SendFn::new(send_msg));
 

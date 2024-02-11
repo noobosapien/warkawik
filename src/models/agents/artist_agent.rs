@@ -12,13 +12,6 @@ use crate::models::agents::agent_traits::{AgentFunctions, RouteObject, Shader};
 use crate::models::manager::manager::Manager;
 
 use async_trait::async_trait;
-use core::panic;
-use reqwest::Client;
-use std::process::{Command, Stdio};
-use std::rc::Rc;
-use std::sync::Arc;
-use std::time::Duration;
-use tokio::time;
 
 #[derive(Debug)]
 
@@ -55,8 +48,7 @@ impl ArtistAgent {
         );
 
         let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-
-        manager.send_msg("Creating the shader.".to_string());
+        manager.send_msg(0, "Creating the shader.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -80,8 +72,7 @@ impl ArtistAgent {
         );
 
         let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-
-        manager.send_msg("Improving the shader.".to_string());
+        manager.send_msg(0, "Improving the shader.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -94,7 +85,7 @@ impl ArtistAgent {
         let sanitized = sanitize_frag(ai_response);
 
         let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-        manager.send_msg(sanitized.clone());
+        manager.send_msg(1, sanitized.clone());
 
         save_frag_file(&sanitized);
         shader.frag_shader = Some(sanitized);
@@ -110,8 +101,7 @@ impl ArtistAgent {
         );
 
         let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-
-        manager.send_msg("Fixing shader bugs.".to_string());
+        manager.send_msg(0, "Fixing shader bugs.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -187,8 +177,8 @@ mod tests {
 
     #[tokio::test]
     async fn tests_shader_artist() {
-        let send_msg: Arc<Box<dyn Fn(Rc<String>) + Send + Sync>> =
-            Arc::new(Box::new(move |agent_msg: Rc<String>| {
+        let send_msg: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> =
+            Arc::new(Box::new(move |num: u8, agent_msg: Rc<String>| {
                 let agent_str = (*agent_msg).to_string();
 
                 println!("{}", agent_str);

@@ -1,3 +1,4 @@
+
 precision highp float;
 
 varying vec2 v_fragTexCoord;
@@ -7,15 +8,11 @@ uniform vec2 u_resolution;
 
 void main()
 {
-    float rocketPosition = mod(u_time, 2.0) - 1.0; // Rocket moves up every 2 seconds
-    vec2 rocketShape = vec2(0.1, 0.3); // Width and height of the rocket
-    vec2 position = (gl_FragCoord.xy / u_resolution.xy) * 2.0 - 1.0; // Convert pixel position to -1 to 1 range
-    position.y -= rocketPosition; // Move the rocket up
-
-    // Check if we're inside the rocket shape
-    if (abs(position.x) < rocketShape.x && abs(position.y) < rocketShape.y) {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red color
-    } else {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // Black background
-    }
+    float x = gl_FragCoord.x + u_time * 0.05; // Move to the left over time
+    float y = gl_FragCoord.y;
+    // Simple wave pattern for water effect
+    float wave = sin(x * 10.0 + u_time) * 0.5 + 0.5;
+    // Mix gray color with wave pattern
+    vec3 color = mix(vec3(0.5, 0.5, 0.5), vec3(0.75, 0.75, 0.75), wave);
+    gl_FragColor = vec4(color, 1.0);
 }
