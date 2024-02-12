@@ -1,4 +1,3 @@
-
 precision highp float;
 
 varying vec2 v_fragTexCoord;
@@ -8,11 +7,20 @@ uniform vec2 u_resolution;
 
 void main()
 {
-    float x = gl_FragCoord.x + u_time * 0.05; // Move to the left over time
-    float y = gl_FragCoord.y;
-    // Simple wave pattern for water effect
-    float wave = sin(x * 10.0 + u_time) * 0.5 + 0.5;
-    // Mix gray color with wave pattern
-    vec3 color = mix(vec3(0.5, 0.5, 0.5), vec3(0.75, 0.75, 0.75), wave);
-    gl_FragColor = vec4(color, 1.0);
+    float ballRadius = 0.1;
+    float ballPositionY = abs(sin(u_time)) * 0.5 + 0.25;
+    vec2 ballPosition = vec2(0.5, ballPositionY); // Center X and animated Y
+    vec3 ballColor = vec3(243.0/255.0, 211.0/255.0, 43.0/255.0);
+
+    vec2 fragCoordNorm = gl_FragCoord.xy / u_resolution.xy;
+    float distanceFromBall = distance(fragCoordNorm, ballPosition);
+
+    if(distanceFromBall < ballRadius)
+    {
+        gl_FragColor = vec4(ballColor, 1.0);
+    }
+    else
+    {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // Background color
+    }
 }

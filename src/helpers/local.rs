@@ -95,6 +95,8 @@ pub fn sanitize_frag(frag: String) -> String {
         }
     }
 
+    let out = out.replace(&['`'][..], "");
+
     out.to_string()
 }
 
