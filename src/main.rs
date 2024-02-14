@@ -46,7 +46,8 @@ async fn main() {
 
     let routes = index;
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    println!("Started the server at port 3030");
+    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
 }
 
 async fn user_connected(ws: WebSocket, users: Users) {
