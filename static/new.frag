@@ -1,26 +1,14 @@
 precision highp float;
 
-varying vec2 v_fragTexCoord;
-
 uniform float u_time;
-uniform vec2 u_resolution;
 
 void main()
 {
-    float ballRadius = 0.1;
-    float ballPositionY = abs(sin(u_time)) * 0.5 + 0.25;
-    vec2 ballPosition = vec2(0.5, ballPositionY); // Center X and animated Y
-    vec3 ballColor = vec3(243.0/255.0, 211.0/255.0, 43.0/255.0);
-
-    vec2 fragCoordNorm = gl_FragCoord.xy / u_resolution.xy;
-    float distanceFromBall = distance(fragCoordNorm, ballPosition);
-
-    if(distanceFromBall < ballRadius)
-    {
-        gl_FragColor = vec4(ballColor, 1.0);
-    }
-    else
-    {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // Background color
-    }
+    float x = gl_FragCoord.x / 800.0;
+    float y = gl_FragCoord.y / 600.0;
+    float movement = sin(u_time) * 0.5 + 0.5;
+    float r = abs(sin(x * movement + u_time));
+    float g = abs(sin(y * movement + u_time + 1.0));
+    float b = abs(sin(x * y + u_time + 2.0));
+    gl_FragColor = vec4(r, g, b, 1.0);
 }

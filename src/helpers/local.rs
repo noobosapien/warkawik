@@ -3,12 +3,11 @@ use crate::{llm_api::calls::call_gpt, models::general::llm::Message};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde_json;
+use std::path::Path;
 use std::{fmt::format, fs};
 
-pub const FRAG_SHADER_TEMPLATE: &str =
-    "/home/migara/Desktop/projects/warkawik/static/template.frag";
-pub const FRAG_SHADER_MAIN: &str = "/home/migara/Desktop/projects/warkawik/static/shader.frag";
-pub const STATIC_PATH: &str = "/home/migara/Desktop/projects/warkawik/static/new.frag";
+// pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
+// pub const STATIC_PATH: &str = "../../static/new.frag";
 
 //Extends the given functions output by adding more context to what is actually needed from the LLM.
 pub fn extend_function(func: fn(&str) -> &'static str, input: &str) -> Message {
@@ -73,13 +72,13 @@ pub async fn check_status(client: &Client, url: &str) -> Result<u16, reqwest::Er
 }
 
 pub fn read_template() -> String {
-    let path: String = FRAG_SHADER_TEMPLATE.to_string();
-    fs::read_to_string(path).expect("Couldn't read the Fragment shader template file.")
-}
+    let path: String = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
+        .join("static/template.frag")
+        .to_str()
+        .unwrap()
+        .to_string();
 
-pub fn read_frag_shader() -> String {
-    let path: String = FRAG_SHADER_MAIN.to_string();
-    fs::read_to_string(path).expect("Couldn't read the Fragment shader main file.")
+    fs::read_to_string(path).expect("Couldn't read the Fragment shader template file.")
 }
 
 pub fn sanitize_frag(frag: String) -> String {
@@ -101,7 +100,11 @@ pub fn sanitize_frag(frag: String) -> String {
 }
 
 pub fn save_frag_file(frag: &String) {
-    let path: String = STATIC_PATH.to_string();
+    let path: String = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
+        .join("static/new.frag")
+        .to_str()
+        .unwrap()
+        .to_string();
     fs::write(path, frag).expect("Couldn't write the Fragment shader file.")
 }
 

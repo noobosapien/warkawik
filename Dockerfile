@@ -10,6 +10,7 @@ RUN cargo build --release
 RUN cp ./target/release/warkawik ./warkawik
 RUN rm -rf ./target 
 RUN rm -rf ./src
+RUN rm -rf ./config.yml
 RUN chmod +x ./warkawik  
 
 EXPOSE 3030

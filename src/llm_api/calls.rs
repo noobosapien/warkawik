@@ -3,15 +3,36 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use std::env;
 
+use crate::helpers::config::Config;
 use crate::models::general::llm::{APIResponse, ChatCompletion, Message};
 
 pub async fn call_gpt(messages: Vec<Message>) -> Result<String, Box<dyn std::error::Error + Send>> {
     dotenv().ok();
 
-    let api_key: String =
-        env::var("OPEN_AI_KEY").expect("Could not find the OPEN_AI_KEY in the environment.");
-    let api_org: String =
-        env::var("OPEN_AI_ORG").expect("Could not find the OPEN_AI_ORG in the environment.");
+    // let api_key: String =
+    //     env::var("OPEN_AI_KEY").expect("Could not find the OPEN_AI_KEY in the environment.");
+    // let api_org: String =
+    //     env::var("OPEN_AI_ORG").expect("Could not find the OPEN_AI_ORG in the environment.");
+
+    let config = Config::new();
+
+    let api_key: String = config
+        .map
+        .get("OPEN_AI_KEY")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_owned()
+        .to_string();
+
+    let api_org: String = config
+        .map
+        .get("OPEN_AI_ORG")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_owned()
+        .to_string();
 
     let url: &str = "https://api.openai.com/v1/chat/completions";
 
