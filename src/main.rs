@@ -33,6 +33,7 @@ type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
 
 #[tokio::main]
 async fn main() {
+    const ALLOWED_VERSION: &'static str = "v1";
     pretty_env_logger::init();
 
     let users = Users::default();
