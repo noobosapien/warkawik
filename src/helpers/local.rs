@@ -3,8 +3,9 @@ use crate::{llm_api::calls::call_gpt, models::general::llm::Message};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde_json;
+use std::env;
+use std::fs;
 use std::path::Path;
-use std::{fmt::format, fs};
 
 // pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
 // pub const STATIC_PATH: &str = "../../static/new.frag";
@@ -72,11 +73,19 @@ pub async fn check_status(client: &Client, url: &str) -> Result<u16, reqwest::Er
 }
 
 pub fn read_template() -> String {
-    let path: String = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
-        .join("static/template.frag")
-        .to_str()
-        .unwrap()
-        .to_string();
+    let cur_path = env::current_dir().unwrap().to_str().unwrap().to_string();
+
+    let path: String;
+
+    if cur_path == "/".to_string() {
+        path = "/static/template.frag".to_string();
+    } else {
+        path = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
+            .join("static/template.frag")
+            .to_str()
+            .unwrap()
+            .to_string();
+    }
 
     fs::read_to_string(path).expect("Couldn't read the Fragment shader template file.")
 }
@@ -100,11 +109,20 @@ pub fn sanitize_frag(frag: String) -> String {
 }
 
 pub fn save_frag_file(frag: &String) {
-    let path: String = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
-        .join("static/new.frag")
-        .to_str()
-        .unwrap()
-        .to_string();
+    let cur_path = env::current_dir().unwrap().to_str().unwrap().to_string();
+
+    let path: String;
+
+    if cur_path == "/".to_string() {
+        path = "/static/new.frag".to_string();
+    } else {
+        path = Path::new(&std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
+            .join("static/new.frag")
+            .to_str()
+            .unwrap()
+            .to_string();
+    }
+
     fs::write(path, frag).expect("Couldn't write the Fragment shader file.")
 }
 
