@@ -56,13 +56,15 @@ impl Manager {
         self.add_agent(Box::new(ArtistAgent::new()));
     }
 
-    pub async fn execute_all(&mut self) {
+    pub async fn execute_all(&mut self) -> &Shader {
         self.create_agents();
 
         for agent in &mut self.agents {
             let agent_res: Result<(), Box<dyn std::error::Error>> =
                 agent.execute(&mut self.shader).await;
         }
+
+        return &self.shader;
     }
 }
 

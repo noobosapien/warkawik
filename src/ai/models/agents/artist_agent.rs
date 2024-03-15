@@ -153,6 +153,7 @@ mod tests {
         agent
             .execute(&mut shader)
             .await
-            .expect("Failed to execute Shader.")
+            .expect("Failed to execute Shader.");
+        ()
     }
 }
