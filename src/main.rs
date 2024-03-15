@@ -6,16 +6,17 @@ macro_rules! get_func_str {
 }
 #[macro_use]
 use helpers::command_line::get_response;
+#[macro_use]
+extern crate diesel;
+
+use actix_web;
 use models::manager::manager::Manager;
 
-mod ai_functions;
-mod helpers;
-mod llm_api;
-mod models;
-
-static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
-
-type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
+mod ai;
+use ai::ai_functions;
+use ai::helpers;
+use ai::llm_api;
+use ai::models;
 
 #[tokio::main]
 async fn main() {

@@ -1,14 +1,11 @@
-use crate::ai_functions::ai_artist::{print_fixed_code, print_frag_shader_code};
-use crate::helpers::command_line::{decision_to_proceed, PrintCommand};
-use crate::helpers::local::{check_status, read_template, save_frag_file};
-use crate::helpers::local::{sanitize_frag, task_request};
-use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
+use crate::ai::models::core_agent::core_agent::{AgentState, CoreAgent};
+use crate::ai_functions::ai_artist::{print_frag_shader_code, print_improved_frag_shader_code};
+use crate::helpers::local::task_request;
+use crate::helpers::local::{read_template, save_frag_file};
 
-use crate::models::agents::agent_traits::{AgentFunctions, RouteObject, Shader};
-use crate::models::manager::manager::Manager;
+use crate::ai::models::agents::agent_traits::{AgentFunctions, Shader};
 
 use async_trait::async_trait;
-<<<<<<< HEAD
 
 #[derive(Debug)]
 
@@ -16,11 +13,10 @@ pub struct ArtistAgent {
     attributes: CoreAgent,
     bug_errors: Option<String>,
     bug_count: u8,
-    manager: *const Manager,
 }
 
 impl ArtistAgent {
-    pub fn new(manager: *const Manager) -> Self {
+    pub fn new() -> Self {
         let attributes: CoreAgent = CoreAgent {
             objective: "Develops code for the fragment shader".to_string(),
             position: "Artist Agent".to_string(),
@@ -32,20 +28,14 @@ impl ArtistAgent {
             attributes,
             bug_errors: None,
             bug_count: 0,
-            manager,
         }
     }
 
     async fn call_initial_shader_code(&mut self, shader: &mut Shader) {
-        let code_template_str: String = read_template();
-
         let msg_context: String = format!(
             "CODE_TEMPLATE: {:?} \n SHADER_DESCRIPTION: {:?}\n",
-            code_template_str, shader
+            shader.frag_shader, shader
         );
-
-        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-        manager.send_msg(0, "Creating the shader.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -54,22 +44,16 @@ impl ArtistAgent {
             print_frag_shader_code,
         )
         .await;
-        let sanitized = sanitize_frag(ai_response);
 
-        // save_frag_file(&ai_response);
-        shader.frag_shader = Some(sanitized);
+        save_frag_file(&ai_response);
+        shader.frag_shader = Some(ai_response);
     }
 
     async fn call_improved_shader_code(&mut self, shader: &mut Shader) {
-        let code_template_str: String = read_template();
-
         let msg_context: String = format!(
             "CODE_TEMPLATE: {:?} \n SHADER_DESCRIPTION: {:?}\n",
             shader.frag_shader, shader
         );
-
-        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-        manager.send_msg(0, "Improving the shader.".to_string());
 
         let ai_response: String = task_request(
             msg_context,
@@ -79,27 +63,17 @@ impl ArtistAgent {
         )
         .await;
 
-        let sanitized = sanitize_frag(ai_response);
-
-        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-        manager.send_msg(1, sanitized.clone());
-
-        save_frag_file(&sanitized);
-        shader.frag_shader = Some(sanitized);
+        save_frag_file(&ai_response);
+        shader.frag_shader = Some(ai_response);
     }
 
     async fn call_fix_shader_code(&mut self, shader: &mut Shader) {
-        let code_template_str: String = read_template();
-
         let msg_context: String = format!(
             "BROKEN_CODE: {:?} \n ERROR_BUGS: {:?}\n
             THIS FUNCTION ONLY OUTPUTS THE CODE. JUST THE WORKING CODE AND NOTHING ELSE",
             shader.frag_shader, self.bug_errors
         );
 
-        let manager: &Manager = unsafe { self.manager.as_ref().unwrap() };
-        manager.send_msg(0, "Fixing shader bugs.".to_string());
-
         let ai_response: String = task_request(
             msg_context,
             &self.attributes.position,
@@ -108,14 +82,10 @@ impl ArtistAgent {
         )
         .await;
 
-        let sanitized = sanitize_frag(ai_response);
-
-        save_frag_file(&sanitized);
-        shader.frag_shader = Some(sanitized);
+        save_frag_file(&ai_response);
+        shader.frag_shader = Some(ai_response);
     }
 }
-
-unsafe impl Send for ArtistAgent {}
 
 #[async_trait]
 impl AgentFunctions for ArtistAgent {
@@ -147,15 +117,7 @@ impl AgentFunctions for ArtistAgent {
                     // Implement later
                     self.attributes.state = AgentState::Finished;
                 }
-
-                AgentState::Finished => {
-                    println!("Done");
-                    break;
-                }
-                _ => {
-                    self.attributes.state = AgentState::Finished;
-                    break;
-                }
+                _ => self.attributes.state = AgentState::Finished,
             }
         }
 
@@ -165,29 +127,11 @@ impl AgentFunctions for ArtistAgent {
 
 #[cfg(test)]
 mod tests {
-    use crate::helpers::send_func::SendFn;
-    use crate::models::manager::manager::Manager;
-    use std::rc::Rc;
-    use std::sync::Arc;
-
     use super::*;
 
     #[tokio::test]
     async fn tests_shader_artist() {
-        let send_msg: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> =
-            Arc::new(Box::new(move |num: u8, agent_msg: Rc<String>| {
-                let agent_str = (*agent_msg).to_string();
-
-                println!("{}", agent_str);
-            }));
-
-        let send_struct = Arc::new(SendFn::new(send_msg));
-
-        let manager = Manager::new("".to_string(), send_struct)
-            .await
-            .expect("Unable to create a manager");
-
-        let mut agent = ArtistAgent::new(&manager);
+        let mut agent = ArtistAgent::new();
 
         let shader_str: &str = r#"
         {
@@ -212,10 +156,3 @@ mod tests {
             .expect("Failed to execute Shader.")
     }
 }
-=======
-use core::panic;
-use reqwest::Client;
-use std::process::{Command, Stdio};
-use std::time::Duration;
-use tokio::time;
->>>>>>> e3f2ee0 (Revert "Success creating shaders")

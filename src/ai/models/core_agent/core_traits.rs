@@ -1,5 +1,5 @@
-use crate::models::core_agent::core_agent::AgentState;
-use crate::models::general::llm::Message;
+use crate::ai::models::core_agent::core_agent::AgentState;
+use crate::ai::models::general::llm::Message;
 
 pub trait CoreTraits {
     fn new(objective: String, position: String) -> Self;

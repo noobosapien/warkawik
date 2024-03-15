@@ -1,35 +1,20 @@
-use crate::models::agents::agent_traits::{AgentFunctions, Shader};
-use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
+use crate::ai::models::agents::agent_traits::{AgentFunctions, Shader};
+use crate::ai::models::core_agent::core_agent::{AgentState, CoreAgent};
 
-use crate::ai_functions::ai_manager::input_to_goal;
-use crate::helpers::local::task_request;
-<<<<<<< HEAD
-use crate::helpers::send_func::SendFn;
-use crate::models::agents::artist_agent::{self, ArtistAgent};
-=======
-use crate::models::agents::artist_agent;
->>>>>>> e3f2ee0 (Revert "Success creating shaders")
-use crate::models::general::llm::Message;
-
-use std::marker::Send;
-use std::rc::Rc;
-use std::sync::Arc;
+use crate::ai::ai_functions::ai_manager::input_to_goal;
+use crate::ai::helpers::local::task_request;
+use crate::ai::models::agents::artist_agent::{self, ArtistAgent};
+use crate::ai::models::general::llm::Message;
 
 #[derive(Debug)]
 pub struct Manager {
     attributes: CoreAgent,
     shader: Shader,
     agents: Vec<Box<dyn AgentFunctions>>,
-    pub send_func: Arc<SendFn>,
 }
 
-unsafe impl Send for Manager {}
-
 impl Manager {
-    pub async fn new(
-        usr_req: String,
-        send_func: Arc<SendFn>,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(usr_req: String) -> Result<Self, Box<dyn std::error::Error>> {
         let position: String = "Manager".to_string();
 
         let attributes: CoreAgent = CoreAgent {
@@ -60,7 +45,6 @@ impl Manager {
             attributes,
             agents,
             shader,
-            send_func,
         })
     }
 
@@ -69,17 +53,7 @@ impl Manager {
     }
 
     fn create_agents(&mut self) {
-<<<<<<< HEAD
-        self.add_agent(Box::new(ArtistAgent::new(self as *const Manager)));
-    }
-
-    pub fn send_msg(&self, num: u8, msg: String) {
-        let arc_func: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> = self.send_func.get();
-
-        arc_func(num, Rc::new(msg));
-=======
-        // TODO add artist
->>>>>>> e3f2ee0 (Revert "Success creating shaders")
+        self.add_agent(Box::new(ArtistAgent::new()));
     }
 
     pub async fn execute_all(&mut self) {
@@ -88,11 +62,6 @@ impl Manager {
         for agent in &mut self.agents {
             let agent_res: Result<(), Box<dyn std::error::Error>> =
                 agent.execute(&mut self.shader).await;
-
-            match agent_res {
-                Ok(()) => println!("Done creating the shader"),
-                Err(_) => println!("Error creating the shader"),
-            }
         }
     }
 }
@@ -105,12 +74,7 @@ mod tests {
     async fn tests_manager() {
         let usr_req: &str = "create a shader that shows a palm tree in a sunset";
 
-        let send_msg: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> =
-            Arc::new(Box::new(|num: u8, agent_msg: Rc<String>| {}));
-
-        let send_struct = Arc::new(SendFn::new(send_msg));
-
-        let mut manager_ai: Manager = Manager::new(usr_req.to_string(), send_struct)
+        let mut manager_ai: Manager = Manager::new(usr_req.to_string())
             .await
             .expect("Error creating the managing agent");
 

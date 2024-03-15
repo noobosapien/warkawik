@@ -1,4 +1,4 @@
-use crate::models::core_agent::core_agent::CoreAgent;
+use crate::ai::models::core_agent::core_agent::CoreAgent;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;

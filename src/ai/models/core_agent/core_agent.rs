@@ -1,5 +1,5 @@
-use crate::models::core_agent::core_traits::CoreTraits;
-use crate::models::general::llm::Message;
+use crate::ai::models::core_agent::core_traits::CoreTraits;
+use crate::ai::models::general::llm::Message;
 
 #[derive(Debug, PartialEq)]
 pub enum AgentState {

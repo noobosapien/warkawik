@@ -2,8 +2,8 @@ use dotenv::dotenv;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 
+use crate::ai::models::general::llm::{APIResponse, ChatCompletion, Message};
 use crate::helpers::config::Config;
-use crate::models::general::llm::{APIResponse, ChatCompletion, Message};
 
 pub async fn call_gpt(messages: Vec<Message>) -> Result<String, Box<dyn std::error::Error + Send>> {
     dotenv().ok();
