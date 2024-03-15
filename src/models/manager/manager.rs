@@ -3,8 +3,12 @@ use crate::models::core_agent::core_agent::{AgentState, CoreAgent};
 
 use crate::ai_functions::ai_manager::input_to_goal;
 use crate::helpers::local::task_request;
+<<<<<<< HEAD
 use crate::helpers::send_func::SendFn;
 use crate::models::agents::artist_agent::{self, ArtistAgent};
+=======
+use crate::models::agents::artist_agent;
+>>>>>>> e3f2ee0 (Revert "Success creating shaders")
 use crate::models::general::llm::Message;
 
 use std::marker::Send;
@@ -65,6 +69,7 @@ impl Manager {
     }
 
     fn create_agents(&mut self) {
+<<<<<<< HEAD
         self.add_agent(Box::new(ArtistAgent::new(self as *const Manager)));
     }
 
@@ -72,6 +77,9 @@ impl Manager {
         let arc_func: Arc<Box<dyn Fn(u8, Rc<String>) + Send + Sync>> = self.send_func.get();
 
         arc_func(num, Rc::new(msg));
+=======
+        // TODO add artist
+>>>>>>> e3f2ee0 (Revert "Success creating shaders")
     }
 
     pub async fn execute_all(&mut self) {

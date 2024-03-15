@@ -1,6 +1,4 @@
-use crate::ai_functions::ai_artist::{
-    print_fixed_code, print_frag_shader_code, print_improved_frag_shader_code,
-};
+use crate::ai_functions::ai_artist::{print_fixed_code, print_frag_shader_code};
 use crate::helpers::command_line::{decision_to_proceed, PrintCommand};
 use crate::helpers::local::{check_status, read_template, save_frag_file};
 use crate::helpers::local::{sanitize_frag, task_request};
@@ -10,6 +8,7 @@ use crate::models::agents::agent_traits::{AgentFunctions, RouteObject, Shader};
 use crate::models::manager::manager::Manager;
 
 use async_trait::async_trait;
+<<<<<<< HEAD
 
 #[derive(Debug)]
 
@@ -213,3 +212,10 @@ mod tests {
             .expect("Failed to execute Shader.")
     }
 }
+=======
+use core::panic;
+use reqwest::Client;
+use std::process::{Command, Stdio};
+use std::time::Duration;
+use tokio::time;
+>>>>>>> e3f2ee0 (Revert "Success creating shaders")

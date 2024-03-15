@@ -7,8 +7,14 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
+<<<<<<< HEAD
 // pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
 // pub const STATIC_PATH: &str = "../../static/new.frag";
+=======
+pub const FRAG_SHADER_TEMPLATE: &str = "../../static/template.frag";
+pub const FRAG_SHADER_MAIN: &str = "../../static/shader.frag";
+pub const STATIC_PATH: &str = "../../static/";
+>>>>>>> e3f2ee0 (Revert "Success creating shaders")
 
 //Extends the given functions output by adding more context to what is actually needed from the LLM.
 pub fn extend_function(func: fn(&str) -> &'static str, input: &str) -> Message {
